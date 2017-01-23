@@ -3,5 +3,6 @@
   "licenser.license": "MIT",
   "licenser.author": "LancerComet",
 "licenser.projectName": "node-ftp",
-"typescript.tsdk": "./node_modules/typescript/lib"
+"typescript.tsdk": "./node_modules/typescript/lib",
+"vsicons.presets.angular": false
 }

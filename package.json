@@ -2,7 +2,7 @@
   "name": "node-ftp",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "app/index.js",
   "scripts": {
     "dev": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -14,7 +14,7 @@
   },
   "license": "MIT",
   "devDependencies": {
-    "@types/node": "^7.0.1",
+    "@types/node": "^7.0.0",
     "typescript": "^2.1.5"
   }
 }

@@ -1,0 +1,7 @@
+{
+  "username": "test",
+  "password": "test",
+  "hostname": "localhost",
+  "port_proto": 21,
+  "port_data": 20
+}

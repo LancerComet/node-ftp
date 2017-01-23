@@ -5,7 +5,9 @@
     "removeComments": true,
     "preserveConstEnums": true,
     "sourceMap": true,
-    "watch": true
+    "watch": true,
+    "outDir": "./app",
+    "baseUrl": "./"
   },
   "exclude": [
     "node_modules",

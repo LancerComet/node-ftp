@@ -1,4 +1,6 @@
 /// <reference path="../node_modules/@types/node/index.d.ts" />
+/// <reference path="./cmder/index.d.ts" />
+
 
 /**
  * Client Information.
@@ -10,11 +12,25 @@ declare interface IClientInfo {
   port: number
 }
 
-
+/**
+ * Application configuration object.
+ * 
+ * @interface IAppConfig
+ */
 declare interface IAppConfig {
   username: string,
   password: string,
   hostname: string,
   port_proto: number,
   port_data: number
+}
+
+/**
+ * User input for login authorization.
+ * 
+ * @interface IAuthInput
+ */
+declare interface IAuthInput {
+  username: string
+  password: string
 }

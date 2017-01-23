@@ -8,74 +8,16 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 const appConfig = require('../config.json');
-const DEFINITION = require("./def");
 const utils = require("./utils");
-class Client {
-    constructor(socket) {
-        this.status = 0;
-        this.socket = socket;
-        this.clientInfo = {
-            address: socket.remoteAddress,
-            port: socket.remotePort
-        };
-        this.registerEvents();
-    }
-    registerEvents() {
-        const socket = this.socket;
-        const clientInfo = this.clientInfo;
-        socket.on('connect', () => {
-            console.log('new client is connected.');
-        });
-        socket.on('error', err => {
-            console.error(`[Error] A new error has occured when ${clientInfo.address}:${clientInfo.port} was connecting:`, err);
-        });
-        socket.on('data', (data) => {
-            console.log('data is coming: ', data);
-            if (data.toString() === DEFINITION.CRLF) {
-                console.log('enter triggered.');
-            }
-        });
-        socket.on('drain', () => {
-            console.log('ondrain');
-        });
-        socket.on('end', () => {
-            console.log('end');
-        });
-    }
-    sendGrretingInfo() {
-        return new Promise((resolve, reject) => {
-            const resopnse = utils.addBackspace('220 Greeting from NODE-FTP! :)\n');
-            this.socket.write(resopnse);
-            resolve(this.socket);
-        });
-    }
-    askForUsername() {
-        const socket = this.socket;
-        return new Promise((resolve, reject) => {
-            if (!appConfig.username)
-                return resolve(socket);
-            const response = utils.addBackspace('220 Please provide your username.\r\n');
-            socket.write(response);
-            resolve(socket);
-        });
-    }
-    askForPassword() {
-        const socket = this.socket;
-        return new Promise((resolve, reject) => {
-            if (!appConfig.username)
-                return resolve(socket);
-            const response = utils.addBackspace('331 Please provide your password.\r\n');
-            socket.write(response);
-            resolve(socket);
-        });
-    }
-}
+const model_1 = require("./model");
 function clientOnConnect(socket) {
     return __awaiter(this, void 0, void 0, function* () {
-        const client = new Client(socket);
+        const client = new model_1.Client(socket);
         yield client.sendGrretingInfo();
-        yield client.askForUsername();
-        yield client.askForPassword();
+        yield client.startAuth();
+        socket.write(utils.addBackspace(`Welcome back, ${appConfig.username}!\r\n`));
+        client.registerEvents();
+        console.log('[Info] Connection idle.');
     });
 }
 Object.defineProperty(exports, "__esModule", { value: true });

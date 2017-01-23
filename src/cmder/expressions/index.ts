@@ -10,12 +10,12 @@ import { Variable } from './class.Variable'
  * @export
  */
 export const EXPRESSION_LIST = [
-  'USER', 'PASS'
+  'USER', 'PASS',
+  'help'
 ]
 
 export {
-  USER,
-  PASS,
+  USER, PASS,
   Expression,
   Variable
 }

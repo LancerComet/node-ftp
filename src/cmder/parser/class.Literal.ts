@@ -36,27 +36,6 @@ export class Literal {
 }
 
 /**
- * NumberLiteral.
- * The literal that is number-typed.
- * 
- * @export
- * @class NumberLiteral
- * @extends {Literal}
- */
-export class NumberLiteral extends Literal {
-  /**
-   * Creates an instance of NumberLiteral.
-   * 
-   * @param {number} value
-   * 
-   * @memberOf NumberLiteral
-   */
-  constructor (value: number) {
-    super('NumberLiteral', value)
-  }
-}
-
-/**
  * StringLiteral.
  * The literal that is string-typed.
  * 

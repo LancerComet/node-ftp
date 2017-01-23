@@ -6,8 +6,8 @@
  * # Carry Your World #
  */
 
-import { Expression, EXPRESSION_LIST, Variable } from '../'
-import { NumberLiteral, StringLiteral } from '../../parser'
+import { Expression } from '../'
+import { StringLiteral } from '../../parser'
 
 import { errorHandler } from '../../utils'
 
@@ -31,12 +31,14 @@ export function createExpression (currentToken: Token, tokens: Array<Token>, ast
   // Let's deal with the first arg.
   // "USER" must be followed by a username string literal.
   // Username argument.
+  if (!tokens.length) {
+    return console.warn('[Caution] USER: No vaild argument is provided.')
+  }
+  
   const usernameArg = tokens.shift()
 
   userExpression.insertArg(
-    usernameArg.type === 'word'
-    ? new StringLiteral(usernameArg.value)
-    : new NumberLiteral(usernameArg.value)
+    usernameArg.type === 'word' && new StringLiteral(usernameArg.value)
   )
 
   ast.insertExpression(userExpression)

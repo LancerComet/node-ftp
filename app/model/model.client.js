@@ -12,7 +12,7 @@ const utils = require("../utils");
 const appConfig = require('../../config.json');
 class Client {
     constructor(socket) {
-        this.status = 0;
+        this.clientRawData = '';
         this.authInput = {
             username: '',
             password: ''
@@ -23,20 +23,17 @@ class Client {
             port: socket.remotePort
         };
     }
+    resetClientRawData() {
+        this.clientRawData = '';
+    }
     registerEvents() {
         const socket = this.socket;
         const clientInfo = this.clientInfo;
-        socket.on('connect', () => {
-            console.log('new client is connected.');
-        });
         socket.on('error', err => {
             console.error(`[Error] A new error has occured when ${clientInfo.address}:${clientInfo.port} was connecting:`, err);
         });
         socket.on('data', (data) => {
-            console.log('data is coming: ', data);
-            if (data.toString() === DEFINITION.CRLF) {
-                console.log('enter triggered.');
-            }
+            this.onData(data);
         });
         socket.on('drain', () => {
             console.log('ondrain');
@@ -45,9 +42,22 @@ class Client {
             console.log('end');
         });
     }
+    onData(data) {
+        if (data.toString() === DEFINITION.CRLF) {
+            this.onCommandConfirm();
+        }
+        else {
+            this.clientRawData += data;
+        }
+    }
+    onCommandConfirm() {
+        console.log('enter triggered: ', this.clientRawData);
+        const directive = this.clientRawData;
+        this.resetClientRawData();
+    }
     sendGrretingInfo() {
         return new Promise((resolve, reject) => {
-            const resopnse = utils.addBackspace('220 Greeting from NODE-FTP! :)\r\n\r\n');
+            const resopnse = utils.addBackspace('\r\n220 Greeting from NODE-FTP! :)\r\n');
             this.socket.write(resopnse);
             resolve(this.socket);
         });
@@ -86,6 +96,7 @@ class Client {
                     data += chunks;
                     return;
                 }
+                socket.removeListener('data', onData);
                 const userInput = data;
                 this.authInput.password = utils.getPassword(userInput);
                 data = '';
@@ -94,11 +105,10 @@ class Client {
                     resolve(socket);
                 }
                 else {
-                    const authFailedRes = utils.addBackspace('425 Username or password is wrong.\r\n\r\n');
+                    const authFailedRes = utils.addBackspace('\r\n530 [Error] Username or password is wrong.\r\n\r\n');
                     socket.write(authFailedRes);
-                    this.startAuth();
+                    reject();
                 }
-                socket.removeListener('data', onData);
             };
             let data = '';
             socket.on('data', onData);
@@ -106,12 +116,17 @@ class Client {
     }
     startAuth() {
         return __awaiter(this, void 0, void 0, function* () {
-            yield this.askForUsername();
-            yield this.askForPassword();
+            try {
+                yield this.askForUsername();
+                yield this.askForPassword();
+            }
+            catch (tryErr) {
+                yield this.startAuth();
+            }
             console.log(`[Info] New client from ${this.clientInfo.address}:${this.clientInfo.port} is connected successfully.`);
+            return true;
         });
     }
 }
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = Client;
-//# sourceMappingURL=model.client.js.map

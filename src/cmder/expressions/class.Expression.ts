@@ -25,7 +25,7 @@ export class Expression {
    * @type {(Array<Literal | Keyword>)} 
    * @memberOf Expression
    */
-  arguments: Array<Literal | Keyword> = []
+  arguments: Array<Literal> = []
   
   /**
    * Creates an instance of Expression.
@@ -45,7 +45,7 @@ export class Expression {
    * 
    * @memberOf Expression
    */
-  insertArg (argument: Literal | Keyword) {
+  insertArg (argument: Literal) {
     this.arguments.push(argument)
   }
 }

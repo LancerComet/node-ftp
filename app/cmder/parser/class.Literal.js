@@ -6,12 +6,6 @@ class Literal {
     }
 }
 exports.Literal = Literal;
-class NumberLiteral extends Literal {
-    constructor(value) {
-        super('NumberLiteral', value);
-    }
-}
-exports.NumberLiteral = NumberLiteral;
 class StringLiteral extends Literal {
     constructor(value) {
         super('StringLiteral', value);
@@ -24,4 +18,3 @@ class ExpressionLiteral extends Literal {
     }
 }
 exports.ExpressionLiteral = ExpressionLiteral;
-//# sourceMappingURL=class.Literal.js.map

@@ -23,27 +23,6 @@ export class Token {
 }
 
 /**
- * NumberToken.
- * 
- * @export
- * @class NumberToken
- * @extends {Token}
- */
-export class NumberToken extends Token {
-  
-  /**
-   * Creates an instance of NumberToken.
-   * 
-   * @param {number} value
-   * 
-   * @memberOf NumberToken
-   */
-  constructor (value: number) {
-    super('number', value)
-  }
-}
-
-/**
  * WordToken.
  * 
  * @export

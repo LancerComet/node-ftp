@@ -1,5 +1,5 @@
 import addBackspace from './util.add-backspace'
-import { getUsername, getPassword } from './util.user-input'
+import { getUsername, getPassword } from './util.cmd-handler'
 import auth from './util.auth'
 
 export {

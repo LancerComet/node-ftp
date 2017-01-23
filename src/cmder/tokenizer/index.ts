@@ -9,7 +9,7 @@
  * NumberToken, WordToken.
  */
 
-import { Token, NumberToken, WordToken } from './class.Token'
+import { Token, WordToken } from './class.Token'
 
 /**
  * Tokenizer for document script.
@@ -21,10 +21,7 @@ import { Token, NumberToken, WordToken } from './class.Token'
 export function tokenizer (code: string) : Array<Token> {
   return code.split(/\s+/)
     .filter(words => words.length > 0)
-    .map((words: string | number) => isNaN(parseInt(<string> words, 0)) 
-      ? new WordToken(<string> words)
-      : new NumberToken(<number> words)
-    )
+    .map(words => new WordToken(words))
 }
 
-export { Token, NumberToken, WordToken }
+export { Token, WordToken }

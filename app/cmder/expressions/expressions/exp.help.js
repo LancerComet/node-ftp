@@ -1,7 +1,7 @@
 "use strict";
 const _1 = require("../");
 const parser_1 = require("../../parser");
-const EXP_NAME = 'PASS';
+const EXP_NAME = 'help';
 function createExpression(currentToken, tokens, ast) {
     const passExpression = new _1.Expression(EXP_NAME);
     if (!tokens.length) {

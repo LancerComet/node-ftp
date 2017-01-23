@@ -7,4 +7,3 @@ const BINARY = 'I';
 exports.BINARY = BINARY;
 const IMAGE = 'I';
 exports.IMAGE = IMAGE;
-//# sourceMappingURL=index.js.map

@@ -9,4 +9,3 @@ class AST {
     }
 }
 exports.AST = AST;
-//# sourceMappingURL=class.AST.js.map

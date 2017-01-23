@@ -6,4 +6,3 @@ class Variable {
     }
 }
 exports.Variable = Variable;
-//# sourceMappingURL=class.Variable.js.map

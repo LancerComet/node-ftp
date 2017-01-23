@@ -9,25 +9,6 @@ declare class Token {
 }
 
 /**
- * NumberToken.
- * 
- * @class NumberToken
- * @extends {Token}
- */
-declare class NumberToken extends Token {
-  type: string
-
-  /**
-   * Creates an instance of NumberToken.
-   * 
-   * @param {number} value
-   * 
-   * @memberOf NumberToken
-   */
-  constructor (value: number)
-}
-
-/**
  * WordToken.
  * 
  * @class WordToken

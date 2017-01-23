@@ -1,7 +1,7 @@
 /// <reference path="../tokenizer/class.Token.d.ts" />
 
 import { AST } from './class.AST'
-import { Literal, NumberLiteral, StringLiteral, ExpressionLiteral } from './class.Literal'
+import { Literal, StringLiteral, ExpressionLiteral } from './class.Literal'
 
 import * as expressions from '../expressions'
 
@@ -30,5 +30,5 @@ export function parser (tokens: Array<Token> = []) : false | AST {
 
 export {
   AST,
-  Literal, NumberLiteral, StringLiteral, ExpressionLiteral
+  Literal, StringLiteral, ExpressionLiteral
 }

@@ -22,26 +22,6 @@ declare class Literal {
 }
 
 /**
- * NumberLiteral.
- * The literal that is number-typed.
- * 
- * @class NumberLiteral
- * @extends {Literal}
- */
-declare class NumberLiteral extends Literal {
-  type: string
-
-  /**
-   * Creates an instance of NumberLiteral.
-   * 
-   * @param {number} value
-   * 
-   * @memberOf NumberLiteral
-   */
-  constructor (value: number)
-}
-
-/**
  * StringLiteral.
  * The literal that is string-typed.
  * 

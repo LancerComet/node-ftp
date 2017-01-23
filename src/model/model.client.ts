@@ -19,18 +19,29 @@ export default class Client {
   socket: net.Socket
 
   /**
-   * Status of this client.
-   * This would be some ftp status code.
-   */
-  status: number = 0
-
-  /**
    * Client information.
    * @type {IClientInfo}
    */
   clientInfo: IClientInfo
 
-  
+  /**
+   * The raw data that sent by client.
+   * 
+   * @type {string}
+   * @private
+   */
+  private clientRawData: string = ''
+
+  /**
+   * Reset client raw data to empty string.
+   * 
+   * @return void
+   * @private
+   */
+  private resetClientRawData () {
+    this.clientRawData = ''
+  }
+
   /**
    * User input for login authorization.
    * 
@@ -53,19 +64,13 @@ export default class Client {
     const socket = this.socket
     const clientInfo = this.clientInfo
 
-    socket.on('connect', () => {
-      console.log('new client is connected.')
-    })
-
     socket.on('error', err => {
       console.error(`[Error] A new error has occured when ${clientInfo.address}:${clientInfo.port} was connecting:`, err)
     })
 
+    // socket.on('data', this.onData)
     socket.on('data', (data: Buffer) => {
-      console.log('data is coming: ', data)
-      if (data.toString() === DEFINITION.CRLF) {
-        console.log('enter triggered.')
-      }
+      this.onData(data)  // Avoid context binding, DanTeng!
     })
 
     socket.on('drain', () => {
@@ -78,13 +83,41 @@ export default class Client {
   }
 
   /**
+   * Event that will be triggered when tcp data is received.
+   * 
+   * @returns void
+   * @private
+   */
+  private onData (data: Buffer) {
+    if (data.toString() === DEFINITION.CRLF) {
+      this.onCommandConfirm()
+    } else {
+      this.clientRawData += data
+    }
+  }
+
+  /**
+   * Event that will be triggered when user confirmed the command.
+   * 
+   * @returns void
+   * @private
+   */
+  private onCommandConfirm () {
+    console.log('enter triggered: ', this.clientRawData)
+    const directive = this.clientRawData
+    
+    // Reset client raw data.
+    this.resetClientRawData()
+  }
+
+  /**
    * Send greeting information to client.
    * 
    * @returns {Promise<Function>}
    */
   sendGrretingInfo () : Promise<Function> {
     return new Promise((resolve, reject) => {
-      const resopnse = utils.addBackspace('220 Greeting from NODE-FTP! :)\r\n\r\n')
+      const resopnse = utils.addBackspace('\r\n220 Greeting from NODE-FTP! :)\r\n')
       this.socket.write(resopnse)
       resolve(this.socket)
     })
@@ -146,22 +179,23 @@ export default class Client {
           return
         }
 
-        // End of input. Get password and check both username and password.
+        // Remove this listener.        
+        socket.removeListener('data', onData)
+
+        // End of input. Get password and check both username and password.                
         const userInput = data
         this.authInput.password = utils.getPassword(userInput)
         data = ''
 
         const isAuthSuccess = utils.auth(this.authInput.username, this.authInput.password)
+
         if (isAuthSuccess) {
-          // Remove this listener.
           resolve(socket)
         } else {
-          const authFailedRes = utils.addBackspace('425 Username or password is wrong.\r\n\r\n')
-          socket.write(authFailedRes);
-          this.startAuth()
+          const authFailedRes = utils.addBackspace('\r\n530 [Error] Username or password is wrong.\r\n\r\n')
+          socket.write(authFailedRes)
+          reject()
         }
-        
-        socket.removeListener('data', onData)        
       }
 
       let data = ''
@@ -169,10 +203,20 @@ export default class Client {
     })
   }
 
+  /**
+   * Start authorization function.
+   * For login authorization.
+   */
   async startAuth () {
-    await this.askForUsername()
-    await this.askForPassword()
+    try {
+      await this.askForUsername()
+      await this.askForPassword()
+    } catch (tryErr) {
+      // Username or password is wrong. Try again.
+      await this.startAuth()
+    }
     console.log(`[Info] New client from ${this.clientInfo.address}:${this.clientInfo.port} is connected successfully.`)
+    return true
   }
 
   constructor (socket: net.Socket) {
@@ -181,6 +225,5 @@ export default class Client {
       address: socket.remoteAddress,
       port: socket.remotePort
     }
-    // this.registerEvents()
   }
 }

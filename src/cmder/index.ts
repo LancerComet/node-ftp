@@ -5,10 +5,12 @@
 
 import { tokenizer } from './tokenizer'
 import { parser } from './parser'
+import * as expression from './expressions'
 
 export {
   tokenizer,
-  parser
+  parser,
+  expression
 }
 
 // Usage:

@@ -1,7 +1,7 @@
 /// <reference path="../../index.d.ts" />
 
 /*
- * Expression: pass.
+ * Expression: help.
  * By LancerComet at 23:58, 2016.11.26.
  * # Carry Your World #
  */
@@ -11,7 +11,7 @@ import { StringLiteral } from '../../parser'
 
 import { errorHandler } from '../../utils'
 
-const EXP_NAME = 'PASS'
+const EXP_NAME = 'help'
 
 /**
  * createExpression: pass.

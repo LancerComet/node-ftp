@@ -5,4 +5,3 @@ function auth(username, password) {
 }
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = auth;
-//# sourceMappingURL=util.auth.js.map

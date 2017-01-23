@@ -8,6 +8,6 @@ exports.Expression = class_Expression_1.Expression;
 const class_Variable_1 = require("./class.Variable");
 exports.Variable = class_Variable_1.Variable;
 exports.EXPRESSION_LIST = [
-    'USER', 'PASS'
+    'USER', 'PASS',
+    'help'
 ];
-//# sourceMappingURL=index.js.map

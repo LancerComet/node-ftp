@@ -1,6 +1,6 @@
 {
-  "username": "test",
-  "password": "test",
+  "username": "USER",
+  "password": "USER",
   "hostname": "localhost",
   "port_proto": 21,
   "port_data": 20

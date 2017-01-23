@@ -10,4 +10,3 @@ class Expression {
     }
 }
 exports.Expression = Expression;
-//# sourceMappingURL=class.Expression.js.map

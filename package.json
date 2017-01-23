@@ -1,7 +1,7 @@
 {
   "name": "node-ftp",
-  "version": "1.0.0",
-  "description": "",
+  "version": "0.1.0",
+  "description": "A tiny ftp-server written in Node.JS.",
   "main": "app/index.js",
   "scripts": {
     "dev": "tsc",

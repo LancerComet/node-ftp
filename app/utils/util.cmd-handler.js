@@ -35,4 +35,3 @@ function commonFunc(condition, str) {
     const result = match[0].replace(`${condition} `, '');
     return result;
 }
-//# sourceMappingURL=util.user-input.js.map

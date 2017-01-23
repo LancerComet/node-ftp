@@ -1,1 +1,0 @@
-{"version":3,"file":"class.AST.js","sourceRoot":"","sources":["../../../src/cmder/parser/class.AST.ts"],"names":[],"mappings":";AAQA;IA0BE,YAAa,IAAI,GAAG,EAAE,EAAE,OAA0B,EAAE;QAClD,IAAI,CAAC,IAAI,GAAG,IAAI,CAAA;QAChB,IAAI,CAAC,IAAI,GAAG,IAAI,CAAA;IAClB,CAAC;IASD,gBAAgB,CAAE,UAAsB;QACtC,IAAI,CAAC,IAAI,CAAC,IAAI,CAAC,UAAU,CAAC,CAAA;IAC5B,CAAC;CACF;AAzCD,kBAyCC"}

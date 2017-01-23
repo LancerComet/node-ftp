@@ -28,10 +28,10 @@ declare class Expression {
   /**
    * Arguments of this expression.
    * 
-   * @type {(Array<Literal | Keyword>)} 
+   * @type {(Array<Literal>)} 
    * @memberOf Expression
    */
-  arguments: Array<Literal | Keyword>
+  arguments: Array<Literal>
 
   /**
    * Creates an instance of Expression.
@@ -45,9 +45,9 @@ declare class Expression {
   /**
    * Insert an new argument into this expression.
    * 
-   * @param {(Literal | Keyword)} argument
+   * @param {Literal} argument
    * 
    * @memberOf Expression
    */
-  insertArg (argument: Literal | Keyword)
+  insertArg (argument: Literal)
 }

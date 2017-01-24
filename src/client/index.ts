@@ -14,13 +14,53 @@ const appConfig: IAppConfig = require('../../config.json')
  * @class Client
  */
 export default class Client {
+  static readonly MAX_RETRYING_TIME = 3
+
+  /** Whether this client object is initialized. */
   private inited: boolean = false
+
+  /**
+   * Retrying times.
+   * Will be increase (+1 per time) when error retrying occured.
+   */
+  private _retrying: number = 0
+  
+  private get retrying () {
+    return this._retrying
+  }
+
+  private set retrying (newVal) {
+    if (this._retrying <= Client.MAX_RETRYING_TIME) {
+      this._retrying = newVal     
+    } else {
+      this.disconnect('500 Error.')
+    }
+  }
+
+  /**
+   * Assign retrying error.
+   * 
+   * @return void
+   */
+  private assignRetryingError () {
+    this.retrying++
+  }
 
   /**
    * Client information.
    * @type {IClientInfo}
+   * @private
    */
-  clientInfo: IClientInfo
+  private clientInfo: IClientInfo
+  
+  /**
+   * Return client information.
+   * 
+   * @returns {IClientInfo}
+   */
+  getClientInfo () {
+    return this.clientInfo
+  }
 
   /**
    * The socket object of this client.
@@ -44,6 +84,17 @@ export default class Client {
    */
   write (content: string) {
     this.socket.write(utils.addBackspace(content))
+  }
+
+  /**
+   * End connection.
+   * 
+   * @param {string} [content]
+   * @return void
+   */
+  disconnect (content?: string) {
+    this.write(content || '')
+    this.socket.destroy()
   }
 
   /**
@@ -130,7 +181,9 @@ export default class Client {
    */
   private onCommandConfirm () {
     const userCmd = this.clientRawData
-    console.log('enter triggered: ', userCmd)
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Command send: ', userCmd)
+    }
     cmder(userCmd, this)
     this.resetClientRawData()
   }
@@ -216,8 +269,9 @@ export default class Client {
         if (isAuthSuccess) {
           resolve(socket)
         } else {
-          const authFailedRes = utils.addBackspace('\r\n530 [Error] Username or password is wrong.\r\n\r\n')
+          const authFailedRes = utils.addBackspace('530 Username or password is wrong.\r\n\r\n')
           socket.write(authFailedRes)
+          this.assignRetryingError()
           reject()
         }
       }
@@ -229,6 +283,7 @@ export default class Client {
   /**
    * Start authorization function.
    * For login authorization.
+   * @async
    */
   async startAuth () {
     try {

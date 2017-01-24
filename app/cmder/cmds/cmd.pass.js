@@ -1,6 +1,6 @@
 "use strict";
-const _1 = require("../");
-function pass(userInput) {
+const _1 = require('../');
+function PASS(userInput) {
     try {
         return _1.valueExtracter('PASS', userInput);
     }
@@ -9,4 +9,4 @@ function pass(userInput) {
     }
 }
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.default = pass;
+exports.default = PASS;

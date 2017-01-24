@@ -1,5 +1,5 @@
 "use strict";
-const _1 = require("../");
+const _1 = require('../');
 function commandReader(userCmd, client) {
     let matching = userCmd.match(/^\S+/);
     if (!matching) {

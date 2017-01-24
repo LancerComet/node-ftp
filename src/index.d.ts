@@ -1,7 +1,5 @@
 /// <reference path="../node_modules/@types/node/index.d.ts" />
-/// <reference path="./cmder/index.d.ts" />
-/// <reference path="./model/index.d.ts" />
-
+/// <reference path="./client/index.d.ts" />
 
 /**
  * Client Information.

@@ -19,7 +19,7 @@ import * as net from 'net'
 import * as process from 'process'
 import * as os from 'os'
 
-import { Client } from './model'
+import Client from './client'
 import * as utils from './utils'
 
 createLocalServer()
@@ -68,7 +68,6 @@ async function clientOnConnect (socket: net.Socket) {
 
   // Register events.  
   client.registerEvents()
-  socket.end()
 
   console.log('[Info] Connection idle.')
 }

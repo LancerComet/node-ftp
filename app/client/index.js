@@ -86,7 +86,9 @@ class Client {
     }
     onCommandConfirm() {
         const userCmd = this.clientRawData;
-        console.log('enter triggered: ', userCmd);
+        if (process.env.NODE_ENV === 'development') {
+            console.log('Command send: ', userCmd);
+        }
         cmder_1.cmder(userCmd, this);
         this.resetClientRawData();
     }

@@ -7,7 +7,7 @@ import { valueExtracter } from '../'
  * @param {string} str
  * @returns {string}
  */
-export default function user (userInput: string) : string {
+export default function USER (userInput: string) : string {
   try {
     return valueExtracter('USER', userInput)    
   } catch (tryErr) {

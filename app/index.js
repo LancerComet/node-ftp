@@ -33,12 +33,13 @@ function createLocalServer() {
 function clientOnConnect(socket) {
     return __awaiter(this, void 0, void 0, function* () {
         const client = new model_1.Client(socket);
-        yield client.sendGrretingInfo();
+        yield client.sendGreetingInfo();
         yield client.startAuth();
         socket.write(utils.addBackspace(`\r\n230---- Welcome back, ${appConfig.username}! ----\r\n`));
         socket.write(utils.addBackspace(`230-Feel free to use commands to control files.\r\n`));
         socket.write(utils.addBackspace(`230 Login Successful.\r\n`));
         client.registerEvents();
+        socket.end();
         console.log('[Info] Connection idle.');
     });
 }

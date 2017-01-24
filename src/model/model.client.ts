@@ -3,8 +3,7 @@ import * as net from 'net'
 import * as DEFINITION from '../def'
 import * as utils from '../utils'
 
-
-import { expression, parser, tokenizer } from '../cmder'
+import { cmder } from '../cmder'
 
 const appConfig: IAppConfig = require('../../config.json')
 
@@ -15,17 +14,37 @@ const appConfig: IAppConfig = require('../../config.json')
  * @class Client
  */
 export default class Client {
-  /**
-   * The socket object of this client.
-   * @type {net.Socket}
-   */ 
-  socket: net.Socket
+  private inited: boolean = false
 
   /**
    * Client information.
    * @type {IClientInfo}
    */
   clientInfo: IClientInfo
+
+  /**
+   * The socket object of this client.
+   * @type {net.Socket}
+   */ 
+  private socket: net.Socket
+
+  /**
+   * Get socket from extenral.
+   * @returns { net.Socket }
+   */
+  getSocket () {
+    return this.socket
+  }
+
+  /**
+   * Write message to client.
+   * 
+   * @param {string} content
+   * @return void
+   */
+  write (content: string) {
+    this.socket.write(utils.addBackspace(content))
+  }
 
   /**
    * The raw data that sent by client.
@@ -51,7 +70,7 @@ export default class Client {
    * @type {IAuthInput}
    * @memberOf Client
    */
-  authInput: IAuthInput = {
+  private authInput: IAuthInput = {
     username: '',
     password: ''
   }
@@ -64,6 +83,8 @@ export default class Client {
    * @returns void
    */
   registerEvents () : void {
+    if (this.inited) { return }
+
     const socket = this.socket
     const clientInfo = this.clientInfo
 
@@ -83,6 +104,8 @@ export default class Client {
     socket.on('end', () => {
       console.log('end')
     })
+
+    this.inited = true
   }
 
   /**
@@ -106,19 +129,9 @@ export default class Client {
    * @private
    */
   private onCommandConfirm () {
-    console.log('enter triggered: ', this.clientRawData)
-    const directive = parser(tokenizer(this.clientRawData))
-    console.log(directive)
-    
-    // expression.EXPRESSION_LIST.some(expName => {
-    //   if (expName === directive) {
-    //     expression[expName] && expression[expName].run(this)
-    //     return true
-    //   }
-    // })
-    
-    
-    // Reset client raw data.
+    const userCmd = this.clientRawData
+    console.log('enter triggered: ', userCmd)
+    cmder(userCmd, this)
     this.resetClientRawData()
   }
 
@@ -127,7 +140,7 @@ export default class Client {
    * 
    * @returns {Promise<Function>}
    */
-  sendGrretingInfo () : Promise<Function> {
+  sendGreetingInfo () : Promise<Function> {
     return new Promise((resolve, reject) => {
       const resopnse = utils.addBackspace('\r\n220 Greeting from NODE-FTP! :)\r\n')
       this.socket.write(resopnse)
@@ -141,7 +154,7 @@ export default class Client {
    * @param {net.Socket} socket
    * @returns {Promise<Function>} 
    */
-  askForUsername () : Promise<Function> {
+  private askForUsername () : Promise<Function> {
     const socket = this.socket
 
     return new Promise((resolve, reject) => {
@@ -152,21 +165,20 @@ export default class Client {
 
       const onData = (chunks: Buffer) => {
         if (chunks.toString() !== DEFINITION.CRLF) {
-          data += chunks
+          this.clientRawData += chunks
           return
         }
 
         // End of input. Get username.
-        const userInput = data
-        this.authInput.username = utils.getUsername(userInput)
-        data = ''
+        const userCmd = this.clientRawData
+        this.authInput.username = cmder(userCmd)
+        this.resetClientRawData()
 
         // Remove this listener.
         socket.removeListener('data', onData)
         resolve(socket)
       }
 
-      let data = ''
       socket.on('data', onData)
     })
   }
@@ -177,7 +189,7 @@ export default class Client {
    * @param {net.Socket} socket
    * @returns {Promise<Function>}
    */
-  askForPassword () : Promise<Function> {
+  private askForPassword () : Promise<Function> {
     const socket = this.socket
     return new Promise((resolve, reject) => {
       if (!appConfig.username) return resolve(socket)
@@ -187,7 +199,7 @@ export default class Client {
 
       const onData =  (chunks: Buffer) => {
         if (chunks.toString() !== DEFINITION.CRLF) {
-          data += chunks
+          this.clientRawData += chunks
           return
         }
 
@@ -195,9 +207,9 @@ export default class Client {
         socket.removeListener('data', onData)
 
         // End of input. Get password and check both username and password.                
-        const userInput = data
-        this.authInput.password = utils.getPassword(userInput)
-        data = ''
+        const userInput = this.clientRawData
+        this.authInput.password = cmder(userInput)
+        this.resetClientRawData()
 
         const isAuthSuccess = utils.auth(this.authInput.username, this.authInput.password)
 
@@ -210,7 +222,6 @@ export default class Client {
         }
       }
 
-      let data = ''
       socket.on('data', onData)
     })
   }

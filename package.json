@@ -2,10 +2,11 @@
   "name": "node-ftp",
   "version": "0.1.0",
   "description": "A tiny ftp-server written in Node.JS.",
-  "main": "app/index.js",
+  "main": "bin/prod.js",
   "scripts": {
-    "dev": "tsc",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "node bin/dev.js",
+    "start": "node bin/prod.js",
+    "test": "node bin/test.js"
   },
   "keywords": [],
   "author": {

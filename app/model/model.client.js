@@ -13,6 +13,7 @@ const cmder_1 = require("../cmder");
 const appConfig = require('../../config.json');
 class Client {
     constructor(socket) {
+        this.inited = false;
         this.clientRawData = '';
         this.authInput = {
             username: '',
@@ -24,10 +25,19 @@ class Client {
             port: socket.remotePort
         };
     }
+    getSocket() {
+        return this.socket;
+    }
+    write(content) {
+        this.socket.write(utils.addBackspace(content));
+    }
     resetClientRawData() {
         this.clientRawData = '';
     }
     registerEvents() {
+        if (this.inited) {
+            return;
+        }
         const socket = this.socket;
         const clientInfo = this.clientInfo;
         socket.on('error', err => {
@@ -42,6 +52,7 @@ class Client {
         socket.on('end', () => {
             console.log('end');
         });
+        this.inited = true;
     }
     onData(data) {
         if (data.toString() === DEFINITION.CRLF) {
@@ -52,12 +63,12 @@ class Client {
         }
     }
     onCommandConfirm() {
-        console.log('enter triggered: ', this.clientRawData);
-        const directive = cmder_1.parser(cmder_1.tokenizer(this.clientRawData));
-        console.log(directive);
+        const userCmd = this.clientRawData;
+        console.log('enter triggered: ', userCmd);
+        cmder_1.cmder(userCmd, this);
         this.resetClientRawData();
     }
-    sendGrretingInfo() {
+    sendGreetingInfo() {
         return new Promise((resolve, reject) => {
             const resopnse = utils.addBackspace('\r\n220 Greeting from NODE-FTP! :)\r\n');
             this.socket.write(resopnse);
@@ -73,16 +84,15 @@ class Client {
             socket.write(response);
             const onData = (chunks) => {
                 if (chunks.toString() !== DEFINITION.CRLF) {
-                    data += chunks;
+                    this.clientRawData += chunks;
                     return;
                 }
-                const userInput = data;
-                this.authInput.username = utils.getUsername(userInput);
-                data = '';
+                const userCmd = this.clientRawData;
+                this.authInput.username = cmder_1.cmder(userCmd);
+                this.resetClientRawData();
                 socket.removeListener('data', onData);
                 resolve(socket);
             };
-            let data = '';
             socket.on('data', onData);
         });
     }
@@ -95,13 +105,13 @@ class Client {
             socket.write(response);
             const onData = (chunks) => {
                 if (chunks.toString() !== DEFINITION.CRLF) {
-                    data += chunks;
+                    this.clientRawData += chunks;
                     return;
                 }
                 socket.removeListener('data', onData);
-                const userInput = data;
-                this.authInput.password = utils.getPassword(userInput);
-                data = '';
+                const userInput = this.clientRawData;
+                this.authInput.password = cmder_1.cmder(userInput);
+                this.resetClientRawData();
                 const isAuthSuccess = utils.auth(this.authInput.username, this.authInput.password);
                 if (isAuthSuccess) {
                     resolve(socket);
@@ -112,7 +122,6 @@ class Client {
                     reject();
                 }
             };
-            let data = '';
             socket.on('data', onData);
         });
     }

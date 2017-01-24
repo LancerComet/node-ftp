@@ -1,18 +1,21 @@
-/*
- *  Document Script By LancerComet at 21:01, 2016.11.26.
- *  # Carry Your World #
- */
+import user from './cmds/cmd.user'
+import pass from './cmds/cmd.pass'
+import help from './cmds/cmd.help'
 
-import { tokenizer } from './tokenizer'
-import { parser } from './parser'
-import * as expression from './expressions'
+import cmder from './utils/cmder'
+import valueExtracter from './utils/value-extracter'
 
-export {
-  tokenizer,
-  parser,
-  expression
+const cmds = { 
+  USER: user,
+  PASS: pass,
+
+  // Build-in commands.
+  help
 }
 
-// Usage:
-// const token = tokenizer('USER address PASS microsoft')
-// const ast = <AST> parser(token)
+export {
+  cmds,
+
+  cmder,
+  valueExtracter
+}

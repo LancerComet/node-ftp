@@ -58,7 +58,7 @@ function createLocalServer () {
  */
 async function clientOnConnect (socket: net.Socket) {
   const client = new Client(socket)
-  await client.sendGrretingInfo()  
+  await client.sendGreetingInfo()  
   await client.startAuth()
 
   // Login Successfully.
@@ -68,6 +68,7 @@ async function clientOnConnect (socket: net.Socket) {
 
   // Register events.  
   client.registerEvents()
+  socket.end()
 
   console.log('[Info] Connection idle.')
 }

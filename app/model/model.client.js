@@ -9,6 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 const DEFINITION = require("../def");
 const utils = require("../utils");
+const cmder_1 = require("../cmder");
 const appConfig = require('../../config.json');
 class Client {
     constructor(socket) {
@@ -52,7 +53,8 @@ class Client {
     }
     onCommandConfirm() {
         console.log('enter triggered: ', this.clientRawData);
-        const directive = this.clientRawData;
+        const directive = cmder_1.parser(cmder_1.tokenizer(this.clientRawData));
+        console.log(directive);
         this.resetClientRawData();
     }
     sendGrretingInfo() {

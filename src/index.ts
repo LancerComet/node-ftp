@@ -62,10 +62,9 @@ async function clientOnConnect (socket: net.Socket) {
   await client.startAuth()
 
   // Login Successfully.
-  socket.write(utils.addBackspace(`\r\n230  ---- Welcome back, ${appConfig.username}! ----\r\n`))
-  socket.write(utils.addBackspace(`230  Login Successful.\r\n`))
-  socket.write(utils.addBackspace(`230  Feel free to use commands to control files.\r\n`))
-  socket.write('>')
+  socket.write(utils.addBackspace(`\r\n230---- Welcome back, ${appConfig.username}! ----\r\n`))
+  socket.write(utils.addBackspace(`230-Feel free to use commands to control files.\r\n`))
+  socket.write(utils.addBackspace(`230 Login Successful.\r\n`))
 
   // Register events.  
   client.registerEvents()

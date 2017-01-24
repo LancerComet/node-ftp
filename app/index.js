@@ -35,10 +35,9 @@ function clientOnConnect(socket) {
         const client = new model_1.Client(socket);
         yield client.sendGrretingInfo();
         yield client.startAuth();
-        socket.write(utils.addBackspace(`\r\n230  ---- Welcome back, ${appConfig.username}! ----\r\n`));
-        socket.write(utils.addBackspace(`230  Login Successful.\r\n`));
-        socket.write(utils.addBackspace(`230  Feel free to use commands to control files.\r\n`));
-        socket.write('>');
+        socket.write(utils.addBackspace(`\r\n230---- Welcome back, ${appConfig.username}! ----\r\n`));
+        socket.write(utils.addBackspace(`230-Feel free to use commands to control files.\r\n`));
+        socket.write(utils.addBackspace(`230 Login Successful.\r\n`));
         client.registerEvents();
         console.log('[Info] Connection idle.');
     });

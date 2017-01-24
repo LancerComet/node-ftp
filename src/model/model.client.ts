@@ -3,6 +3,9 @@ import * as net from 'net'
 import * as DEFINITION from '../def'
 import * as utils from '../utils'
 
+
+import { expression, parser, tokenizer } from '../cmder'
+
 const appConfig: IAppConfig = require('../../config.json')
 
 /**
@@ -104,7 +107,16 @@ export default class Client {
    */
   private onCommandConfirm () {
     console.log('enter triggered: ', this.clientRawData)
-    const directive = this.clientRawData
+    const directive = parser(tokenizer(this.clientRawData))
+    console.log(directive)
+    
+    // expression.EXPRESSION_LIST.some(expName => {
+    //   if (expName === directive) {
+    //     expression[expName] && expression[expName].run(this)
+    //     return true
+    //   }
+    // })
+    
     
     // Reset client raw data.
     this.resetClientRawData()

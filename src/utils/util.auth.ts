@@ -1,10 +1,10 @@
-const appConfig: IAppConfig = require('../../config.json')
-
-/**
- * Check both username and password.
- * 
- * @returns {boolean}
- */
-export default function auth (username: string, password: string) : Boolean {
-  return username === appConfig.username && password === appConfig.password
+export function getPassword (username: string) {
+  // Requiring in function can get latest content from file.
+  const appConfig: IAppConfig = require('../../config.json')
+  
+  const users = appConfig.users
+  const matching = users.filter(item => item.username === username)[0]
+  return matching
+    ? matching.password
+    : false
 }

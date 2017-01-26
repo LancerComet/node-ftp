@@ -1,6 +1,11 @@
 {
-  "username": "USER",
-  "password": "USER",
+  "users": [
+    {
+      "username": "USER",
+      "password": "USER",
+      "root": "C:/"
+    }
+  ],
   "hostname": "localhost",
   "port_proto": 21,
   "port_data": 20

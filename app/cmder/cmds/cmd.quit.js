@@ -1,7 +1,7 @@
 "use strict";
-function quit(userInput, client) {
-    client.disconnect('200 Bye.');
+function QUIT(clientInput, client) {
+    client.disconnect();
     return true;
 }
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.default = quit;
+exports.default = QUIT;

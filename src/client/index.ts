@@ -1,9 +1,7 @@
 import * as net from 'net'
-
 import * as DEFINITION from '../def'
-import * as utils from '../utils'
-
-import { cmder } from '../cmder'
+import { commander } from '../cmder'
+import { auth } from '../utils'
 
 const appConfig: IAppConfig = require('../../config.json')
 
@@ -14,10 +12,14 @@ const appConfig: IAppConfig = require('../../config.json')
  * @class Client
  */
 export default class Client {
+  /** Chances for retrying. */
   static readonly MAX_RETRYING_TIME = 3
 
   /** Whether this client object is initialized. */
   private inited: boolean = false
+
+  /** Whether client is logged-in. */
+  private isLogin: boolean = false
 
   /**
    * Retrying times.
@@ -40,7 +42,7 @@ export default class Client {
   /**
    * Assign retrying error.
    * 
-   * @return void
+   * @return {void}
    */
   private assignRetryingError () {
     this.retrying++
@@ -77,27 +79,6 @@ export default class Client {
   }
 
   /**
-   * Write message to client.
-   * 
-   * @param {string} content
-   * @return void
-   */
-  write (content: string) {
-    this.socket.write(utils.addBackspace(content))
-  }
-
-  /**
-   * End connection.
-   * 
-   * @param {string} [content]
-   * @return void
-   */
-  disconnect (content?: string) {
-    this.write(content || '')
-    this.socket.destroy()
-  }
-
-  /**
    * The raw data that sent by client.
    * 
    * @type {string}
@@ -108,11 +89,45 @@ export default class Client {
   /**
    * Reset client raw data to empty string.
    * 
-   * @return void
+   * @return {void}
    * @private
    */
   private resetClientRawData () {
     this.clientRawData = ''
+  }
+
+  /**
+   * Write message to client.
+   * 
+   * @param {string} content
+   * @return {void}
+   */
+  write (content: string) {
+    this.socket.write(
+      new Buffer(
+        (new RegExp(`.+${DEFINITION.CRLF}$`).test(content) ? content : content += DEFINITION.CRLF)
+      )
+    )
+  }
+
+  /**
+   * Send 500 to client.
+   * 
+   * @return {void}
+   */
+  errorCmd () {
+    this.write('500 Error.')
+  }
+
+  /**
+   * End connection.
+   * 
+   * @param {string} [content='200 Bye.']
+   * @return {void}
+   */
+  disconnect (content: string = '200 Bye.') {
+    this.write(content)
+    this.socket.destroy()
   }
 
   /**
@@ -127,11 +142,25 @@ export default class Client {
   }
 
   /**
+   * Register login username.
+   */
+  setLoginUsername (username: string) {
+    this.authInput.username = username
+  }
+
+  /**
+   * Register login password.
+   */
+  setLoginPassword (password: string) {
+    this.authInput.password = password
+  }
+
+  /**
    * Register events to incoming socket.
    * 
    * @param {net.Socket} socket
    * @param {IClientInfo} clientInfo
-   * @returns void
+   * @return {void}
    */
   registerEvents () : void {
     if (this.inited) { return }
@@ -139,11 +168,8 @@ export default class Client {
     const socket = this.socket
     const clientInfo = this.clientInfo
 
-    socket.on('error', err => {
-      console.error(`[Error] A new error has occured when ${clientInfo.address}:${clientInfo.port} was connecting:`, err)
-    })
+    socket.on('error', this.onError)
 
-    // socket.on('data', this.onData)
     socket.on('data', (data: Buffer) => {
       this.onData(data)  // Avoid context binding, DanTeng!
     })
@@ -162,7 +188,7 @@ export default class Client {
   /**
    * Event that will be triggered when tcp data is received.
    * 
-   * @returns void
+   * @return {void}
    * @private
    */
   private onData (data: Buffer) {
@@ -174,18 +200,71 @@ export default class Client {
   }
 
   /**
-   * Event that will be triggered when user confirmed the command.
+   * Connection Error Handler.
    * 
-   * @returns void
+   * @param {Error} error
+   */
+  private onError (error: Error) {
+    console.error(`[Error] An error is occured: `, error)
+  }
+
+  /**
+   * Event that will be triggered when user confirms a command.
+   * 
+   * @return {void}
    * @private
    */
   private onCommandConfirm () {
+    const client = this
     const userCmd = this.clientRawData
+    
     if (process.env.NODE_ENV === 'development') {
       console.log('Command send: ', userCmd)
     }
-    cmder(userCmd, this)
+
+    // Login status or commands that can be executed without authorization.
+    if (this.isLogin || /^(USER|PASS|HELP|QUIT|EXIT)/i.test(userCmd)) {
+      commander(userCmd, client)
+    }
+
     this.resetClientRawData()
+  }
+
+  /**
+   * Login authorization.
+   * 
+   * @return {void}
+   */
+  loginAuth () {
+    const userInputUsername = this.authInput.username
+    const userInputPassword = this.authInput.password
+
+    const definedPassword = auth.getPassword(userInputUsername)
+
+    // "definedPassword = false" means no such user.
+    console.log('username: ', userInputUsername)
+    console.log('definedPassword: ', definedPassword)
+    console.log('password entered: ', userInputPassword)
+    if (definedPassword === false || userInputPassword !== definedPassword) {
+      this.write('530 Login incorrect, username or password is wrong.')
+    } else {
+      this.loginSuccessfully()
+    }
+  }
+
+  /**
+   * Event will be triggered when user is logged in.
+   * 
+   * @return {void}
+   */
+  private loginSuccessfully () {
+    console.log(`[Info] New client from ${this.clientInfo.address}:${this.clientInfo.port} is connected successfully.`)
+    
+    this.isLogin = true
+
+    this.write(`230---- Welcome back, ${this.authInput.username}! ----`)
+    this.write(`230-Feel free to use commands to control files.`)
+    this.write(`230 Login Successful.`)
   }
 
   /**
@@ -195,113 +274,37 @@ export default class Client {
    */
   sendGreetingInfo () : Promise<Function> {
     return new Promise((resolve, reject) => {
-      const resopnse = utils.addBackspace('\r\n220 Greeting from NODE-FTP! :)\r\n')
-      this.socket.write(resopnse)
+      this.write('220 Greeting from NODE-FTP! :)')
       resolve(this.socket)
     })
   }
 
   /**
-   * Tell client that an username is required.
-   * 
-   * @param {net.Socket} socket
-   * @returns {Promise<Function>} 
+   * Tell client that a username is required.
    */
-  private askForUsername () : Promise<Function> {
-    const socket = this.socket
-
-    return new Promise((resolve, reject) => {
-      if (!appConfig.username) return resolve(socket)
-
-      const response = utils.addBackspace('332 Please provide your username:\r\n')
-      socket.write(response)
-
-      const onData = (chunks: Buffer) => {
-        if (chunks.toString() !== DEFINITION.CRLF) {
-          this.clientRawData += chunks
-          return
-        }
-
-        // End of input. Get username.
-        const userCmd = this.clientRawData
-        this.authInput.username = cmder(userCmd)
-        this.resetClientRawData()
-
-        // Remove this listener.
-        socket.removeListener('data', onData)
-        resolve(socket)
-      }
-
-      socket.on('data', onData)
-    })
+  askForUsername () {
+    // this.write('332 Please provide your username.')
   }
 
   /**
    * Tell client that a password is required.
-   * 
-   * @param {net.Socket} socket
-   * @returns {Promise<Function>}
    */
-  private askForPassword () : Promise<Function> {
-    const socket = this.socket
-    return new Promise((resolve, reject) => {
-      if (!appConfig.username) return resolve(socket)
-
-      const response = utils.addBackspace('331 Please provide your password:\r\n')      
-      socket.write(response)
-
-      const onData =  (chunks: Buffer) => {
-        if (chunks.toString() !== DEFINITION.CRLF) {
-          this.clientRawData += chunks
-          return
-        }
-
-        // Remove this listener.        
-        socket.removeListener('data', onData)
-
-        // End of input. Get password and check both username and password.                
-        const userInput = this.clientRawData
-        this.authInput.password = cmder(userInput)
-        this.resetClientRawData()
-
-        const isAuthSuccess = utils.auth(this.authInput.username, this.authInput.password)
-
-        if (isAuthSuccess) {
-          resolve(socket)
-        } else {
-          const authFailedRes = utils.addBackspace('530 Username or password is wrong.\r\n\r\n')
-          socket.write(authFailedRes)
-          this.assignRetryingError()
-          reject()
-        }
-      }
-
-      socket.on('data', onData)
-    })
+  askForPassword () {
+    this.write('331 Please provide your password.')
   }
 
-  /**
-   * Start authorization function.
-   * For login authorization.
-   * @async
-   */
-  async startAuth () {
-    try {
-      await this.askForUsername()
-      await this.askForPassword()
-    } catch (tryErr) {
-      // Username or password is wrong. Try again.
-      await this.startAuth()
+  /** Setup this conenction and socket. */
+  private setup () {
+    this.clientInfo = {
+      address: this.socket.remoteAddress,
+      port: this.socket.remotePort
     }
-    console.log(`[Info] New client from ${this.clientInfo.address}:${this.clientInfo.port} is connected successfully.`)
-    return true
+    this.socket.setKeepAlive(true)    
   }
 
   constructor (socket: net.Socket) {
     this.socket = socket
-    this.clientInfo = {
-      address: socket.remoteAddress,
-      port: socket.remotePort
-    }
+    this.setup()
+    this.registerEvents()
   }
 }

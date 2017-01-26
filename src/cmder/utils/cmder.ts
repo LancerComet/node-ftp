@@ -1,5 +1,5 @@
 import { Socket } from 'net'
-import { Client } from '../../model'
+import Client from '../../client'
 import { cmds } from '../'
 
 /**
@@ -9,17 +9,17 @@ import { cmds } from '../'
  * @param {Client} [client]
  * @returns {string}
  */
-export default function commandReader (userCmd: string, client?: Client) : string {
-  let matching = userCmd.match(/^\S+/)
+export default function commander (userCmd: string, client?: Client) : string {
+  const matching = userCmd.match(/^\S+/)
   if (!matching) { return '' }
 
-  let cmd = matching[0]
+  const cmd = matching[0].toLowerCase()  // Convert all commands to lowercase.
   if (!cmds[cmd]) { return '' }
 
   try {
     return cmds[cmd](userCmd, client)
   } catch (tryErr) {
-    console.error(`[Error] ${tryErr}`)
+    console.error(`[Error] Commander Error: ${tryErr}`)
     return ''
   }
 }

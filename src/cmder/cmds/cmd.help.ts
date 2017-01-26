@@ -1,14 +1,14 @@
-import { Client } from '../../model'
+import Client from '../../client'
 
 /**
  * Buildin command: help.
  * Print all available FTP commands for user. 
  * 
  * @export
- * @param {string} userInput - Content sent from client, Always be "help".
+ * @param {string} clientInput - Content sent from client, Always be "help".
  * @returns {boolean}
  */
-export default function help (userInput: string, client: Client) : boolean {
+export default function help (clientInput: string, client: Client) : boolean {
   client.write(
     '214-The following commands are recognized.\r\n' +
     ' ABOR ACCT ALLO APPE CDUP CWD  DELE EPRT EPSV FEAT HELP LIST MDTM MKD\r\n' +

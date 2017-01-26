@@ -1,12 +1,14 @@
 "use strict";
 const _1 = require('../');
-function PASS(userInput) {
+function PASS(clientInput, client) {
+    let password = '';
     try {
-        return _1.valueExtracter('PASS', userInput);
+        password = _1.valueExtracter('PASS', clientInput);
     }
     catch (tryErr) {
-        return '';
     }
+    client.setLoginPassword(password);
+    client.loginAuth();
 }
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = PASS;

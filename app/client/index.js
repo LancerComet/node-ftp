@@ -1,19 +1,12 @@
 "use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator.throw(value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments)).next());
-    });
-};
 const DEFINITION = require('../def');
-const utils = require('../utils');
 const cmder_1 = require('../cmder');
+const utils_1 = require('../utils');
 const appConfig = require('../../config.json');
 class Client {
     constructor(socket) {
         this.inited = false;
+        this.isLogin = false;
         this._retrying = 0;
         this.clientRawData = '';
         this.authInput = {
@@ -21,10 +14,8 @@ class Client {
             password: ''
         };
         this.socket = socket;
-        this.clientInfo = {
-            address: socket.remoteAddress,
-            port: socket.remotePort
-        };
+        this.setup();
+        this.registerEvents();
     }
     get retrying() {
         return this._retrying;
@@ -46,15 +37,24 @@ class Client {
     getSocket() {
         return this.socket;
     }
-    write(content) {
-        this.socket.write(utils.addBackspace(content));
-    }
-    disconnect(content) {
-        this.write(content || '');
-        this.socket.destroy();
-    }
     resetClientRawData() {
         this.clientRawData = '';
+    }
+    write(content) {
+        this.socket.write(new Buffer((new RegExp(`.+${DEFINITION.CRLF}$`).test(content) ? content : content += DEFINITION.CRLF)));
+    }
+    errorCmd() {
+        this.write('500 Error.');
+    }
+    disconnect(content = '200 Bye.') {
+        this.write(content);
+        this.socket.destroy();
+    }
+    setLoginUsername(username) {
+        this.authInput.username = username;
+    }
+    setLoginPassword(password) {
+        this.authInput.password = password;
     }
     registerEvents() {
         if (this.inited) {
@@ -62,9 +62,7 @@ class Client {
         }
         const socket = this.socket;
         const clientInfo = this.clientInfo;
-        socket.on('error', err => {
-            console.error(`[Error] A new error has occured when ${clientInfo.address}:${clientInfo.port} was connecting:`, err);
-        });
+        socket.on('error', this.onError);
         socket.on('data', (data) => {
             this.onData(data);
         });
@@ -84,84 +82,58 @@ class Client {
             this.clientRawData += data;
         }
     }
+    onError(error) {
+        console.error(`[Error] An error is occured: `, error);
+    }
     onCommandConfirm() {
+        const client = this;
         const userCmd = this.clientRawData;
         if (process.env.NODE_ENV === 'development') {
             console.log('Command send: ', userCmd);
         }
-        cmder_1.cmder(userCmd, this);
+        if (this.isLogin || /^(USER|PASS|HELP|QUIT|EXIT)/i.test(userCmd)) {
+            cmder_1.commander(userCmd, client);
+        }
         this.resetClientRawData();
+    }
+    loginAuth() {
+        const userInputUsername = this.authInput.username;
+        const userInputPassword = this.authInput.password;
+        const definedPassword = utils_1.auth.getPassword(userInputUsername);
+        console.log('username: ', userInputUsername);
+        console.log('definedPassword: ', definedPassword);
+        console.log('password entered: ', userInputPassword);
+        if (definedPassword === false || userInputPassword !== definedPassword) {
+            this.write('530 Login incorrect, username or password is wrong.');
+        }
+        else {
+            this.loginSuccessfully();
+        }
+    }
+    loginSuccessfully() {
+        console.log(`[Info] New client from ${this.clientInfo.address}:${this.clientInfo.port} is connected successfully.`);
+        this.isLogin = true;
+        this.write(`230---- Welcome back, ${this.authInput.username}! ----`);
+        this.write(`230-Feel free to use commands to control files.`);
+        this.write(`230 Login Successful.`);
     }
     sendGreetingInfo() {
         return new Promise((resolve, reject) => {
-            const resopnse = utils.addBackspace('\r\n220 Greeting from NODE-FTP! :)\r\n');
-            this.socket.write(resopnse);
+            this.write('220 Greeting from NODE-FTP! :)');
             resolve(this.socket);
         });
     }
     askForUsername() {
-        const socket = this.socket;
-        return new Promise((resolve, reject) => {
-            if (!appConfig.username)
-                return resolve(socket);
-            const response = utils.addBackspace('332 Please provide your username:\r\n');
-            socket.write(response);
-            const onData = (chunks) => {
-                if (chunks.toString() !== DEFINITION.CRLF) {
-                    this.clientRawData += chunks;
-                    return;
-                }
-                const userCmd = this.clientRawData;
-                this.authInput.username = cmder_1.cmder(userCmd);
-                this.resetClientRawData();
-                socket.removeListener('data', onData);
-                resolve(socket);
-            };
-            socket.on('data', onData);
-        });
     }
     askForPassword() {
-        const socket = this.socket;
-        return new Promise((resolve, reject) => {
-            if (!appConfig.username)
-                return resolve(socket);
-            const response = utils.addBackspace('331 Please provide your password:\r\n');
-            socket.write(response);
-            const onData = (chunks) => {
-                if (chunks.toString() !== DEFINITION.CRLF) {
-                    this.clientRawData += chunks;
-                    return;
-                }
-                socket.removeListener('data', onData);
-                const userInput = this.clientRawData;
-                this.authInput.password = cmder_1.cmder(userInput);
-                this.resetClientRawData();
-                const isAuthSuccess = utils.auth(this.authInput.username, this.authInput.password);
-                if (isAuthSuccess) {
-                    resolve(socket);
-                }
-                else {
-                    const authFailedRes = utils.addBackspace('530 Username or password is wrong.\r\n\r\n');
-                    socket.write(authFailedRes);
-                    this.assignRetryingError();
-                    reject();
-                }
-            };
-            socket.on('data', onData);
-        });
+        this.write('331 Please provide your password.');
     }
-    startAuth() {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                yield this.askForUsername();
-                yield this.askForPassword();
-            }
-            catch (tryErr) {
-                yield this.startAuth();
-            }
-            console.log(`[Info] New client from ${this.clientInfo.address}:${this.clientInfo.port} is connected successfully.`);
-            return true;
-        });
+    setup() {
+        this.clientInfo = {
+            address: this.socket.remoteAddress,
+            port: this.socket.remotePort
+        };
+        this.socket.setKeepAlive(true);
     }
 }
 Client.MAX_RETRYING_TIME = 3;

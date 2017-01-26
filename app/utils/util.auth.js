@@ -1,7 +1,10 @@
 "use strict";
-const appConfig = require('../../config.json');
-function auth(username, password) {
-    return username === appConfig.username && password === appConfig.password;
+function getPassword(username) {
+    const appConfig = require('../../config.json');
+    const users = appConfig.users;
+    const matching = users.filter(item => item.username === username)[0];
+    return matching
+        ? matching.password
+        : false;
 }
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.default = auth;
+exports.getPassword = getPassword;

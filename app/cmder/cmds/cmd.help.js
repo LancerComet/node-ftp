@@ -1,5 +1,5 @@
 "use strict";
-function help(userInput, client) {
+function help(clientInput, client) {
     client.write('214-The following commands are recognized.\r\n' +
         ' ABOR ACCT ALLO APPE CDUP CWD  DELE EPRT EPSV FEAT HELP LIST MDTM MKD\r\n' +
         ' MODE NLST NOOP OPTS PASS PASV PORT PWD  QUIT REIN REST RETR RMD  RNFR\r\n' +

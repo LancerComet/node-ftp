@@ -1,11 +1,11 @@
 "use strict";
 const _1 = require('../');
-function commandReader(userCmd, client) {
-    let matching = userCmd.match(/^\S+/);
+function commander(userCmd, client) {
+    const matching = userCmd.match(/^\S+/);
     if (!matching) {
         return '';
     }
-    let cmd = matching[0];
+    const cmd = matching[0].toLowerCase();
     if (!_1.cmds[cmd]) {
         return '';
     }
@@ -13,9 +13,9 @@ function commandReader(userCmd, client) {
         return _1.cmds[cmd](userCmd, client);
     }
     catch (tryErr) {
-        console.error(`[Error] ${tryErr}`);
+        console.error(`[Error] Commander Error: ${tryErr}`);
         return '';
     }
 }
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.default = commandReader;
+exports.default = commander;

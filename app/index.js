@@ -17,11 +17,11 @@ const utils = require('./utils');
 createLocalServer();
 function createLocalServer() {
     const server = net.createServer(socket => {
-        socket.write(utils.addBackspace(`220 Node-FTP (v${packageJSON.version}, running on ${os.type()}, ${os.arch()}.)\r\n220 # Carry Your World #\r\n`));
+        socket.write(utils.addBackspace(`220-Node-FTP (v${packageJSON.version}, running on ${os.type()}, ${os.arch()}.)\r\n220-# Carry Your World #\r\n`));
     });
     server.on('connection', clientOnConnect);
     server.on('error', err => {
-        console.log('[Error] Error Occured when create ftp server: ', err);
+        console.log('[Error] Error occured on ftp server: ', err);
         process.exit(1);
     });
     server.on('listening', () => {
@@ -34,11 +34,7 @@ function clientOnConnect(socket) {
     return __awaiter(this, void 0, void 0, function* () {
         const client = new client_1.default(socket);
         yield client.sendGreetingInfo();
-        yield client.startAuth();
-        socket.write(utils.addBackspace(`\r\n230---- Welcome back, ${appConfig.username}! ----\r\n`));
-        socket.write(utils.addBackspace(`230-Feel free to use commands to control files.\r\n`));
-        socket.write(utils.addBackspace(`230 Login Successful.\r\n`));
-        client.registerEvents();
+        client.askForUsername();
         console.log('[Info] Connection idle.');
     });
 }

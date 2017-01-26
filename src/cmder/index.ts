@@ -5,30 +5,36 @@
  */
 
 // FTP Commands.
-import USER from './cmds/cmd.user'
-import PASS from './cmds/cmd.pass'
+import user from './cmds/cmd.user'
+import pass from './cmds/cmd.pass'
+import quit from './cmds/cmd.quit'
+import syst from './cmds/cmd.syst'
+import pasv from './cmds/cmd.pasv'
+import port from './cmds/cmd.port'
 
 // Build-in commands.
 import help from './cmds/cmd.help'
-import quit from './cmds/cmd.quit'
 
-import cmder from './utils/cmder'
+import commander from './utils/cmder'
 import valueExtracter from './utils/value-extracter'
 
 const cmds = { 
   // FTP commands.
-  USER,
-  PASS,
+  pass,
+  pasv,
+  port,
+  quit,
+  syst,
+  user,
 
   // Build-in commands.
   help,
   exit: quit,
-  quit
 }
 
 export {
   cmds,
 
-  cmder,
+  commander,
   valueExtracter
 }

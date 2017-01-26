@@ -1,16 +1,20 @@
 import { valueExtracter } from '../'
+import Client from '../../client'
 
 /**
  * Get username from user input.
  * 
  * @export
  * @param {string} str
- * @returns {string}
+ * @return {void}
  */
-export default function USER (userInput: string) : string {
+export default function USER (clientInput: string, client: Client) {
+  let username = ''
   try {
-    return valueExtracter('USER', userInput)    
+    username = valueExtracter('USER', clientInput)
   } catch (tryErr) {
-    return ''
+    //...
   }
+  client.setLoginUsername(username)
+  client.askForPassword()
 }

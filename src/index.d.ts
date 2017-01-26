@@ -12,11 +12,23 @@ declare interface IClientInfo {
 }
 
 /**
+ * Account definition.
+ * 
+ * @interface IAccountDefine
+ */
+declare interface IAccountDefine {
+  username: string
+  password: string
+  root: string
+}
+
+/**
  * Application configuration object.
  * 
  * @interface IAppConfig
  */
 declare interface IAppConfig {
+  users:IAccountDefine[]
   username: string,
   password: string,
   hostname: string,

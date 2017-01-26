@@ -1,12 +1,14 @@
 "use strict";
 const _1 = require('../');
-function USER(userInput) {
+function USER(clientInput, client) {
+    let username = '';
     try {
-        return _1.valueExtracter('USER', userInput);
+        username = _1.valueExtracter('USER', clientInput);
     }
     catch (tryErr) {
-        return '';
     }
+    client.setLoginUsername(username);
+    client.askForPassword();
 }
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = USER;
